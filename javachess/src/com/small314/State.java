@@ -234,9 +234,64 @@ public class State {
         return val_prime;
     }
 
-    // TODO
     Move iterativeDeepening(double limit, ArrayList<Move> moves) {
-        return null;
+        long start = System.currentTimeMillis();
+        int depth = 1;
+        int max_score = Integer.MIN_VALUE;
+        int idx = -1;
+        ArrayList<Integer> scores = new ArrayList<>();
+        for(int i = 0; i < moves.size(); i++) {
+            Move move = moves.get(i);
+            Undo undo = new Undo(board, move);
+
+            makeMove(move);
+            int score = -(alphaBeta(depth, -Integer.MAX_VALUE, Integer.MAX_VALUE));
+            if(score > max_score) {
+                max_score = score;
+                idx = i;
+            }
+            doUndo(undo);
+        }
+        Move curr_move = moves.get(idx);
+        while(depth < 40) {
+            depth++;
+
+            max_score = Integer.MIN_VALUE;
+            idx = -1;
+            for(int i = 0; i < moves.size(); i++) {
+                Move move = moves.get(i);
+
+                if(System.currentTimeMillis() - start > limit * 1000)
+                    return curr_move;
+                Undo undo = new Undo(board, move);
+                makeMove(move);
+                
+                if(move.win) {
+                    doUndo(undo);
+                    return move;
+                }
+
+                if("W".equals(onMove) &&  !wPieces.contains('K')) {
+                    doUndo(undo);
+                    return curr_move;
+                }
+                else if("B".equals(onMove) &&  !wPieces.contains('k')) {
+                    doUndo(undo);
+                    return curr_move;
+                }
+
+                int score = -(alphaBeta(depth, -Integer.MAX_VALUE, Integer.MAX_VALUE)); 
+                if(score > max_score) {
+                    max_score = score;
+                    idx = i;
+                }
+
+                doUndo(undo);
+            }
+            curr_move = moves.get(idx);
+        }
+
+        return curr_move;
     }
 
     // Promote a pawn.
