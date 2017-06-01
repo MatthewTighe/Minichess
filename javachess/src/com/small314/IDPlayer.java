@@ -8,10 +8,8 @@ public class IDPlayer extends Player {
 
     public IDPlayer(String color, double lmt) {
         super(color);
-        if(lmt == 0) {
+        if(lmt == 0) 
             useAdjusted = true;
-            limit = determineTime();
-        }
         else
             limit = lmt;
     }

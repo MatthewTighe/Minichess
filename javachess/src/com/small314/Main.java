@@ -39,7 +39,7 @@ public class Main {
             else
                 color = String.valueOf(c.offer(offerColor.charAt(0)));
 
-            Player player = new AlphaBetaPlayer(color, 6);
+            Player player = new IDPlayer(color, 0);
             if("B".equals(color)) {
                 String move = c.getMove();
                 System.out.print(player.posn.getPosnString());
