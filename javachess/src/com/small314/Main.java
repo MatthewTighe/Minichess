@@ -129,7 +129,6 @@ public class Main {
                 p2 = new AlphaBetaPlayer("B", p2_depth);
                 break;
             case "id":
-                System.out.println(p2_limit);
                 p2 = new IDPlayer("B", p2_limit);
                 break;
             default:

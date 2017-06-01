@@ -12,6 +12,8 @@ public class IDPlayer extends Player {
             useAdjusted = true;
             limit = determineTime();
         }
+        else
+            limit = lmt;
     }
 
     public Move makeMove() {
