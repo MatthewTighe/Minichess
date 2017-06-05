@@ -2,6 +2,9 @@ package com.small314;
 
 import java.util.ArrayList;
 
+/**
+ * Generates all the moves for the player currently on move.
+ */
 public class MoveGenerator {
     static int YES = 0;
     static int NO = 1;

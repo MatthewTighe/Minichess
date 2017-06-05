@@ -2,6 +2,9 @@ package com.small314;
 
 import java.util.ArrayList;
 
+/**
+ * A heuristic player that chooses the best move based on the board state.
+ */
 public class HeuristicPlayer extends Player {
 
     public HeuristicPlayer(String color) { super(color); }

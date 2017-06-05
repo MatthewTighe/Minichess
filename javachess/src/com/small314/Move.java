@@ -2,6 +2,10 @@ package com.small314;
 
 import java.util.HashMap;
 
+/**
+ * Move representation. Internally, moves are represented in array fashion,
+ * such that a6 = (0, 0).
+ */
 public class Move {
     public Square from, to;
     public boolean win;

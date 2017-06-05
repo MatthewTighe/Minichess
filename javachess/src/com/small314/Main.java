@@ -2,6 +2,9 @@ package com.small314;
 
 import java.io.IOException;
 
+/**
+ * Handles program interaction. 
+ */
 public class Main {
 
     // Offline variables
@@ -39,6 +42,7 @@ public class Main {
             else
                 color = String.valueOf(c.offer(offerColor.charAt(0)));
 
+            // If we're black, then get a move before making your first.
             Player player = new IDPlayer(color, 0);
             if("B".equals(color)) {
                 String move = c.getMove();
@@ -87,8 +91,6 @@ public class Main {
         assert(p2_type != null);
         Player p1 = null;
         Player p2 = null;
-        System.out.println(p1_type);
-        System.out.println(p2_type);
         switch(p1_type) {
             case "human":
                 p1 = new HumanPlayer("W");

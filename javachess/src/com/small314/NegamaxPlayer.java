@@ -2,6 +2,10 @@ package com.small314;
 
 import java.util.ArrayList;
 
+/**
+ * A player that chooses moves based on the results of a negamax search.
+ * @param dpth The depth to which the search is executed.
+ */
 public class NegamaxPlayer extends Player {
     private int depth;
 

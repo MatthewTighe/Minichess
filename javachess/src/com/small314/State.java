@@ -2,6 +2,9 @@ package com.small314;
 
 import java.util.ArrayList;
 
+/**
+ * Board representation, evaluation, and search methods.
+ */
 public class State {
     public static int NROWS = 6;
     public static int NCOLS = 5;
@@ -121,8 +124,8 @@ public class State {
             }
         }
 
-        ply -= 1;
         onMove = flip(onMove);
+        ply -= 1;
     }
 
     // Check if the game is over.
@@ -137,6 +140,8 @@ public class State {
     Move negamaxMove(int depth, ArrayList<Move> moves) {
         long time = System.currentTimeMillis();
         ArrayList<Integer> scores = new ArrayList<>();
+        // For each move, make it, and then compute the score recursively.
+        // Finally, undo the move so that the board is in its original state.
         for(int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
             Undo undo = new Undo(board, move);
@@ -163,6 +168,8 @@ public class State {
 
         ArrayList<Move> moves = MoveGenerator.findMoves(this);
         int max = Integer.MIN_VALUE;
+        // For each move, make it, and then compute the score recursively.
+        // Finally, undo the move so that the board is in its original state.
         for(int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
             Undo undo = new Undo(board, move);
@@ -179,6 +186,8 @@ public class State {
     Move alphaBetaMove(int depth, ArrayList<Move> moves) {
         ArrayList<Integer> scores = new ArrayList<>();
         int alpha = Integer.MAX_VALUE;
+        // For each move, make it, and then compute the score recursively.
+        // Finally, undo the move so that the board is in its original state.
         for(int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
             Undo undo = new Undo(board, move);
@@ -201,13 +210,14 @@ public class State {
         return moves.get(index);
     }
 
-    // Recursively compute scores to depth or game over.
+    // Recursively compute scores to @depth or until the end of the game.
     int alphaBeta(int depth, int alpha, int beta) {
         if(checkEnd() || depth <= 0)
             return computeScore();
 
         ArrayList<Move> moves = MoveGenerator.findMoves(this);
 
+        // Arbitrarily score the first move first, so we have a comparator.
         Move move = moves.get(0);
         moves.remove(0);
         Undo undo = new Undo(board, move);
@@ -217,7 +227,10 @@ public class State {
         if(val_prime >= beta) {
             return val_prime;
         }
+
         alpha = Math.max(val_prime, alpha);
+        // For each move, make it, and then compute the score recursively.
+        // Finally, undo the move so that the board is in its original state.
         for(int i = 0; i < moves.size(); i++) {
             move = moves.get(i);
             undo = new Undo(board, move);
@@ -234,12 +247,16 @@ public class State {
         return val_prime;
     }
 
+    // Do alpha-beta pruned search using iterative deepening, until @limit is
+    // reached. 
     Move iterativeDeepening(double limit, ArrayList<Move> moves) {
         long start = System.currentTimeMillis();
         int depth = 1;
         int max_score = Integer.MIN_VALUE;
         int idx = -1;
         ArrayList<Integer> scores = new ArrayList<>();
+
+        // Do depth one search.
         for(int i = 0; i < moves.size(); i++) {
             Move move = moves.get(i);
             Undo undo = new Undo(board, move);
@@ -252,6 +269,9 @@ public class State {
             }
             doUndo(undo);
         }
+
+        // While we haven't reached the end of the game and we haven't surpassed
+        // @limit, continue doing alpha-beta search.
         Move curr_move = moves.get(idx);
         while(depth < 40) {
             depth++;
@@ -266,11 +286,13 @@ public class State {
                 Undo undo = new Undo(board, move);
                 makeMove(move);
                 
+                // If the move is a winning move, return early.
                 if(move.win) {
                     doUndo(undo);
                     return move;
                 }
 
+                // If the move is a losing move, return early.
                 if("W".equals(onMove) &&  !wPieces.contains('K')) {
                     doUndo(undo);
                     return curr_move;
@@ -280,6 +302,7 @@ public class State {
                     return curr_move;
                 }
 
+                // Otherwise continue searching.
                 int score = -(alphaBeta(depth, -Integer.MAX_VALUE, Integer.MAX_VALUE)); 
                 if(score > max_score) {
                     max_score = score;
@@ -315,6 +338,8 @@ public class State {
         int wScore = 0;
         int bScore = 0;
 
+        // For each location on the board, add the piece value to the respective
+        // side, and compute heuristics.
         for(int i = 0; i < NROWS; i++) {
             for(int j = 0; j < NCOLS; j++) {
                 if(board[i][j] == '.')
@@ -378,6 +403,7 @@ public class State {
             }
         }
 
+        // Return the score according to which side is on move.
         if("W".equals(onMove)) return wScore - bScore;
         else return bScore - wScore;
     }

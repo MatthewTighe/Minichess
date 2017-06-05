@@ -3,6 +3,9 @@ package com.small314;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * A player that selects from available moves randomly.
+ */
 public class RandomPlayer extends Player {
     public RandomPlayer(String color) { super(color); }
 

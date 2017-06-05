@@ -2,6 +2,10 @@ package com.small314;
 
 import java.util.ArrayList;
 
+/**
+ * Player that uses alpha-beta search to decide on its move.
+ * @param dpth Depth to which the player will search.
+ */
 public class AlphaBetaPlayer extends Player {
     private int depth;
 

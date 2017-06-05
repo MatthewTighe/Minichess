@@ -2,6 +2,12 @@ package com.small314;
 
 import java.util.ArrayList;
 
+/**
+ * A player that does iterative deepening search.
+ * @param lmt Time limit in seconds that the player will continue
+ *            searching. If 0, it will adjust its time limit as the game
+ *            continues.
+ */
 public class IDPlayer extends Player {
     private boolean useAdjusted = false;
     private double limit;
@@ -22,6 +28,9 @@ public class IDPlayer extends Player {
         return move;
     }
 
+    /**
+     * Determines the amount of time to use at this point in the game.
+     */
     private int determineTime() {
         if(posn.ply / 2 < 5) return 1;
         if(posn.ply / 2 < 10) return 2;

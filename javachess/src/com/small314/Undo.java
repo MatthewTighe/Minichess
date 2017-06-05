@@ -1,5 +1,8 @@
 package com.small314;
 
+/**
+ * All the information necessary to undo a move.
+ */
 public class Undo {
     int startx;
     int starty;

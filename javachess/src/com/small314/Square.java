@@ -2,6 +2,9 @@ package com.small314;
 
 import java.util.HashMap;
 
+/**
+ * The representation of a square of the board.
+ */
 public class Square {
     public int x, y;
 
