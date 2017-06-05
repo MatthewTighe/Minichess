@@ -155,7 +155,6 @@ public class Client {
             line = in.readLine();
             if (line == null)
                 return null;
-            System.out.println(line);
             if (line.length() == 0)
                 continue;
             ch = line.charAt(0);
@@ -178,9 +177,7 @@ public class Client {
             line = in.readLine();
             if (line == null)
                 throw new IOException("server terminated unexpectedly");
-            System.out.println(line);
         } while (line.length() == 0 || line.charAt(0) != '?');
-        System.out.println(moveStr);
         out.print(moveStr + sendLineEnding);
         out.flush();
     }

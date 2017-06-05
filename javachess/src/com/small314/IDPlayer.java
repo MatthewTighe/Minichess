@@ -34,7 +34,7 @@ public class IDPlayer extends Player {
     private int determineTime() {
         if(posn.ply / 2 < 5) return 1;
         if(posn.ply / 2 < 10) return 2;
-        if(posn.ply / 2 < 35) return 10;
+        if(posn.ply / 2 < 30) return 9;
         else return 4;
     }
 }

@@ -53,10 +53,12 @@ public class Main {
 
             while(true) {
                 // Print board, make a move, and print the move.
+                System.out.println();
                 System.out.print(player.posn.getPosnString());
                 Move move = player.makeMove();
                 System.out.println(move.toStr());
                 c.sendMove(move.toStr());
+                System.out.println();
                 if(move.win) {
                     System.out.print(player.posn.getPosnString());
                     System.out.println("I won!");
