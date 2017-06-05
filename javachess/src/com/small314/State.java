@@ -281,7 +281,7 @@ public class State {
             for(int i = 0; i < moves.size(); i++) {
                 Move move = moves.get(i);
 
-                if(System.currentTimeMillis() - start > limit * 1000)
+                if(System.currentTimeMillis() - start > limit * 1000) 
                     return curr_move;
                 Undo undo = new Undo(board, move);
                 makeMove(move);
@@ -297,7 +297,7 @@ public class State {
                     doUndo(undo);
                     return curr_move;
                 }
-                else if("B".equals(onMove) &&  !wPieces.contains('k')) {
+                else if("B".equals(onMove) &&  !bPieces.contains('k')) {
                     doUndo(undo);
                     return curr_move;
                 }
