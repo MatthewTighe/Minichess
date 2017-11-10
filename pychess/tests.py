@@ -1,141 +1,157 @@
-import glob, os
+'''
+Tests for pychess.
+'''
+
+import glob
 import collections
 import move_gen
 import representation
 from representation import Posn
 from representation import Square
 from representation import Move
-from representation import decode 
+from representation import decode
 
-# Test board printing
-def do_board_init_test():
-    board = Posn('W')
-    assert(board.get_board() == 'W 0\nkqbnr\nppppp\n.....\n.....\nPPPPP\nRNBQK\n')
+class UnitTester():
+    ''' Object to abstract unit tests.'''
 
-
-def do_rep_tests():
-    s1 = Square(0, 0)
-    assert(s1.toStr() == 'a6')
-    s2 = Square(0, 4)
-    assert(s2.toStr() == 'e6')
-    s3 = Square(5, 0)
-    assert(s3.toStr() == 'a1')
-    s4 = Square(5, 4)
-    assert(s4.toStr() == 'e1')
-
-    m = Move(s3, s2)
-    assert(m.toStr() == 'a1-e6')
-
-    assert(m.toStr() == (s3.toStr() + '-' + s2.toStr()))
-
-    board = Posn('W')
-    assert(board.compute_score('W') == 0)
-    assert(board.compute_score('B') == 0)
-    assert(board.compute_score('W', w_pieces=[]) == representation.MIN_SCORE)
-    assert(board.compute_score('B', b_pieces=[]) == representation.MIN_SCORE)
-    assert(board.compute_score('B', w_pieces=[]) == representation.MAX_SCORE)
-    assert(board.compute_score('W', b_pieces=[]) == representation.MAX_SCORE)
-    assert(board.compute_score('W', w_pieces=['Q'], b_pieces=[]) == 900)
-
-    # Check that scores are 900 if the opponents queen is captured.
-    assert(board.check_score_post_move('W', 0, 1) == 900)
-    assert(board.check_score_post_move('B', 5, 3) == 900)
+    def run_tests(self):
+        '''Run all tests.'''
+        self.__do_board_init_test()
+        self.__do_rep_tests()
+        self.__do_print_rep_tests()
+        self.__do_test_moves()
+        self.__ab_neg_test()
+        self.__promotion_test()
 
 
-def do_print_rep_tests():
-    board = Posn('W')
-    board.print_board()
-
-    s1 = Square(0, 0)
-    s2 = Square(0, 4)
-    s3 = Square(5, 0)
-    s4 = Square(5, 4)
-    print(s1.toStr())
-    print(s2.toStr())
-    print(s3.toStr())
-    print(s4.toStr())
-
-    m1 = Move(s3, s2)
-    print('encode ' + m1.toStr())
-    m2 = decode(m1.toStr())
-    print('decode ' + m2.toStr())
-    assert(m1.toStr() == m2.toStr())
+    def __do_board_init_test(self):
+        ''' Test correct starting board position. '''
+        board = Posn('W')
+        assert board.get_board() == 'W 0\nkqbnr\nppppp\n.....\n.....\nPPPPP\nRNBQK\n'
 
 
-def do_test_moves():
-    # Check pawn forward movement
-    board = Posn('W')
-    moves = move_gen.find_moves(board)
+    def __do_rep_tests(self):
+        ''' Test various state representation fundamentals. '''
+        # Test square translation.
+        test_square1 = Square(0, 0)
+        assert test_square1.to_str() == 'a6'
+        test_square2 = Square(0, 4)
+        assert test_square2.to_str() == 'e6'
+        test_square3 = Square(5, 0)
+        assert test_square3.to_str() == 'a1'
+        test_square4 = Square(5, 4)
+        assert test_square4.to_str() == 'e1'
 
-    # Do Bart's move checking
-    ins = glob.glob('move-tests/*.in')
-    for f in ins:
-        with open(f) as i:
-            lines = i.readlines()
-        color = lines[0].split()[1]
-        board = []
-        for i in range(1, len(lines)):
-            line = lines[i].strip()
-            row = []
-            for c in line:
-                row.append(c)
-            board.append(row)
-        posn = Posn('W')
-        posn.on_move= color
-        posn.set_board(board)
-        moves = move_gen.find_moves(posn)
-        move_strs = []
-        for move in moves:
-            move_strs.append(move.toStr())
-        with open(f[0:-2] + 'out') as o:
-            lines = o.readlines()
-        out = []
-        for line in lines:
-            out.append(line.strip())
-        if collections.Counter(move_strs) != collections.Counter(out):
-            print(f)
-            print(posn.on_move)
-            print(move_strs)
-            print(out)
-            print(set(move_strs) - set(out))
-            posn.print_board()
+        # Test move translation and ensure move and square translation are equal.
+        test_move = Move(test_square3, test_square2)
+        assert test_move.to_str() == 'a1-e6'
+
+        assert test_move.to_str() == (test_square3.to_str() + '-' + test_square2.to_str())
+
+        # Check that scores start at zero, and reach appropriate values.
+        board = Posn('W')
+        assert board.compute_score('W') == 0
+        assert board.compute_score('B') == 0
+        assert board.compute_score('W', w_pieces=[]) == representation.MIN_SCORE
+        assert board.compute_score('B', b_pieces=[]) == representation.MIN_SCORE
+        assert board.compute_score('B', w_pieces=[]) == representation.MAX_SCORE
+        assert board.compute_score('W', b_pieces=[]) == representation.MAX_SCORE
+        assert board.compute_score('W', w_pieces=['Q'], b_pieces=[]) == 900
+
+        # Check that scores are 900 if the opponents queen is captured.
+        assert board.check_score_post_move('W', 0, 1) == 900
+        assert board.check_score_post_move('B', 5, 3) == 900
 
 
-def ab_neg_test():
-    t1 = Posn('W')
-    t2 = Posn('W')
-    t1_moves = move_gen.find_moves(t1)
-    t2_moves = move_gen.find_moves(t2)
-    t1_move = t1.negamax_move(3, t1_moves)
-    t2_move = t2.alpha_beta_move(3, t2_moves)
-    print('t1 ' + t1_move.toStr() + ' t2 ' + t2_move.toStr())
-    assert(t1_move.toStr() == t2_move.toStr())
+    def __do_print_rep_tests(self):
+        ''' Test representation printing. '''
+        board = Posn('W')
+        board.print_board()
+
+        test_square1 = Square(0, 0)
+        test_square2 = Square(0, 4)
+        test_square3 = Square(5, 0)
+        test_square4 = Square(5, 4)
+        print(test_square1.to_str())
+        print(test_square2.to_str())
+        print(test_square3.to_str())
+        print(test_square4.to_str())
+
+        test_move1 = Move(test_square3, test_square2)
+        print('encode ' + test_move1.to_str())
+        test_move2 = decode(test_move1.to_str())
+        print('decode ' + test_move2.to_str())
+        assert test_move1.to_str() == test_move2.to_str()
 
 
-def promotion_test():
-    t1 = Posn('W')
-    move = Move(Square(4, 0), Square(0, 1))
-    assert(t1.w_pieces == ['K', 'Q', 'B', 'N', 'R', 'P', 'P', 'P', 'P', 'P'])
-    undo = representation.Undo(t1.board, move)
-    t1.make_move(move)
-    assert(t1.w_pieces == ['K', 'Q', 'B', 'N', 'R', 'P', 'P', 'P', 'P', 'Q'])
-    t1.do_undo(undo)
-    assert(t1.w_pieces == ['K', 'B', 'N', 'R', 'P', 'P', 'P', 'P', 'Q', 'P'])
+    def __do_test_moves(self):
+        ''' Test piece movement. '''
+        # Check pawn forward movement
+        board = Posn('W')
+        moves = move_gen.find_moves(board)
 
-    t2 = Posn('B')
-    t2.on_move = 'B'
-    move = Move(Square(1, 0), Square(5, 1))
-    assert(t2.b_pieces == ['k', 'q', 'b', 'n', 'r', 'p', 'p', 'p', 'p', 'p'])
-    undo = representation.Undo(t2.board, move)
-    t2.make_move(move)
-    assert(t2.b_pieces == ['k', 'q', 'b', 'n', 'r', 'p', 'p', 'p', 'p', 'q'])
-    t2.do_undo(undo)
-    assert(t2.b_pieces == ['k', 'b', 'n', 'r', 'p', 'p', 'p', 'p', 'q', 'p'])
+        # Do Bart's move checking
+        ins = glob.glob('move-tests/*.in')
+        for file in ins:
+            with open(file) as i:
+                lines = i.readlines()
+            color = lines[0].split()[1]
+            board = []
+            for i in range(1, len(lines)):
+                line = lines[i].strip()
+                row = []
+                for char in line:
+                    row.append(char)
+                board.append(row)
+            posn = Posn('W')
+            posn.on_move = color
+            posn.set_board(board)
+            moves = move_gen.find_moves(posn)
+            move_strs = []
+            for move in moves:
+                move_strs.append(move.to_str())
+            with open(f[0:-2] + 'out') as o:
+                lines = o.readlines()
+            out = []
+            for line in lines:
+                out.append(line.strip())
+            if collections.Counter(move_strs) != collections.Counter(out):
+                print(f)
+                print(posn.on_move)
+                print(move_strs)
+                print(out)
+                print(set(move_strs) - set(out))
+                posn.print_board()
 
 
-do_board_init_test()
-# do_rep_tests()
-do_print_rep_tests()
-do_test_moves()
-ab_neg_test()
-promotion_test()
+    def __ab_neg_test(self):
+        ''' Test that alpha-beta and negamax arrive at the same move '''
+        test_posn1 = Posn('W')
+        test_posn2 = Posn('W')
+        test_moves1 = move_gen.find_moves(test_posn1)
+        test_moves2 = move_gen.find_moves(test_posn2)
+        test_move1 = test_posn1.negamax_move(3, test_moves1)
+        test_move2 = test_posn2.alpha_beta_move(3, test_moves2)
+        print('negamax move: ' + test_move1.to_str() + ' alpha-beta move: ' + test_move2.to_str())
+        assert test_move1.to_str() == test_move2.to_str()
+
+
+    def __promotion_test(self):
+        test_posn1 = Posn('W')
+        move = Move(Square(4, 0), Square(0, 1))
+        assert test_posn1.w_pieces == ['K', 'Q', 'B', 'N', 'R', 'P', 'P', 'P', 'P', 'P']
+        undo = representation.Undo(test_posn1.board, move)
+        test_posn1.make_move(move)
+        assert test_posn1.w_pieces == ['K', 'Q', 'B', 'N', 'R', 'P', 'P', 'P', 'P', 'Q']
+        test_posn1.do_undo(undo)
+        assert test_posn1.w_pieces == ['K', 'B', 'N', 'R', 'P', 'P', 'P', 'P', 'Q', 'P']
+
+        test_posn2 = Posn('B')
+        test_posn2.on_move = 'B'
+        move = Move(Square(1, 0), Square(5, 1))
+        assert test_posn2.b_pieces == ['k', 'q', 'b', 'n', 'r', 'p', 'p', 'p', 'p', 'p']
+        undo = representation.Undo(test_posn2.board, move)
+        test_posn2.make_move(move)
+        assert test_posn2.b_pieces == ['k', 'q', 'b', 'n', 'r', 'p', 'p', 'p', 'p', 'q']
+        test_posn2.do_undo(undo)
+        assert test_posn2.b_pieces == ['k', 'b', 'n', 'r', 'p', 'p', 'p', 'p', 'q', 'p']
