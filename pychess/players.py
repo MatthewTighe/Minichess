@@ -8,22 +8,12 @@ import move_gen
 import representation
 from representation import Posn
 
-class HumanPlayer(object):
+class Player(object):
     '''
-    Object to represent a human player.
+    Super class for all player objects.
     '''
     def __init__(self, color):
         self.posn = Posn(color)
-
-
-    def make_move(self):
-        '''
-        Get a move from input and execute it.
-        '''
-        move = representation.decode(input())
-        self.posn.make_move(move)
-        return move.toStr(), move.win
-
 
     def get_move(self, move):
         '''
@@ -32,13 +22,28 @@ class HumanPlayer(object):
         move = representation.decode(move)
         self.posn.make_move(move)
 
+class HumanPlayer(Player):
+    '''
+    Object to represent a human player.
+    '''
+    def __init__(self, color):
+        super().__init__(self, color)
 
-class RandomPlayer(object):
+    def make_move(self):
+        '''
+        Get a move from input and execute it.
+        '''
+        move = representation.decode(input())
+        self.posn.make_move(move)
+        return move.to_str(), move.win
+
+
+class RandomPlayer(Player):
     '''
     Player that chooses moves randomly.
     '''
     def __init__(self, color):
-        self.posn = Posn(color)
+        super().__init__(self, color)
 
     def make_move(self):
         '''
@@ -47,24 +52,15 @@ class RandomPlayer(object):
         moves = move_gen.find_moves(self.posn)
         move = moves[r.randint(0, len(moves))-1]
         self.posn.make_move(move)
-        return move.toStr(), move.win
+        return move.to_str(), move.win
 
 
-    def get_move(self, move):
-        '''
-        Update position representation with received move.
-        '''
-        move = representation.decode(move)
-        self.posn.make_move(move)
-
-
-class HeuristicPlayer(object):
+class HeuristicPlayer(Player):
     '''
     Player that chooses highest-scoring move.
     '''
     def __init__(self, color):
-        self.posn = Posn(color)
-
+        super().__init__(self, color)
 
     def make_move(self):
         '''
@@ -73,31 +69,26 @@ class HeuristicPlayer(object):
         moves = move_gen.find_moves(self.posn)
         scored_moves = []
         for move in moves:
-            scored_moves.append(self.posn.check_score_post_move(
-                self.posn.color, move.to.x, move.to.y))
-        m = max(scored_moves)
-        indices = [i for i, j in enumerate(scored_moves) if j == m]
+            undo = representation.Undo(self.posn, move)
+            self.posn.make_move(move)
+            scored_moves.append(self.posn.compute_score())
+            self.posn.do_undo(undo)
+
+        # Find all moves that have an equal score and choose one randomly.
+        best_score = max(scored_moves)
+        indices = [i for i, j in enumerate(scored_moves) if j == best_score]
         move = moves[indices[r.randint(0, len(indices))-1]]
         self.posn.make_move(move)
-        return move.toStr(), move.win
+        return move.to_str(), move.win
 
 
-    def get_move(self, move):
-        '''
-        Update position representation with received move.
-        '''
-        move = representation.decode(move)
-        self.posn.make_move(move)
-
-
-class NegamaxPlayer:
+class NegamaxPlayer(Player):
     '''
     Choose move based on negamax algorithm. Requires depth to search to.
     '''
     def __init__(self, color, depth):
-        self.posn = Posn(color)
+        super().__init__(self, color)
         self.depth = depth
-
 
     def make_move(self):
         '''
@@ -106,25 +97,16 @@ class NegamaxPlayer:
         moves = move_gen.find_moves(self.posn)
         move = self.posn.negamax_move(self.depth, moves)
         self.posn.make_move(move)
-        return move.toStr(), move.win
+        return move.to_str(), move.win
 
 
-    def get_move(self, move):
-        '''
-        Update position representation with received move.
-        '''
-        move = representation.decode(move)
-        self.posn.make_move(move)
-
-
-class AlphaBetaPlayer:
+class AlphaBetaPlayer(Player):
     '''
     Player that chooses move based on alpha-beta algorithm.
     '''
     def __init__(self, color, depth):
-        self.posn = Posn(color)
+        super().__init__(self, color)
         self.depth = depth
-
 
     def make_move(self):
         '''
@@ -133,28 +115,19 @@ class AlphaBetaPlayer:
         moves = move_gen.find_moves(self.posn)
         move = self.posn.alpha_beta_move(self.depth, moves)
         self.posn.make_move(move)
-        return move.toStr(), move.win
+        return move.to_str(), move.win
 
 
-    def get_move(self, move):
-        '''
-        Update position representation with received move.
-        '''
-        move = representation.decode(move)
-        self.posn.make_move(move)
-
-
-class IDPlayer:
+class IDPlayer(Player):
     '''
     Player that chooses move based on alpha-beta using iterative deepening.
     '''
     def __init__(self, color, limit):
-        self.posn = Posn(color)
+        super().__init__(self, color)
         self.use_adjustment = False
         if limit is None:
             self.use_adjustment = True
         self.limit = limit
-
 
     def make_move(self):
         '''
@@ -165,16 +138,7 @@ class IDPlayer:
             self.limit = self.determine_time()
         move = self.posn.iterative_deepening(self.limit, moves)
         self.posn.make_move(move)
-        return move.toStr(), move.win
-
-
-    def get_move(self, move):
-        '''
-        Update position representation with received move.
-        '''
-        move = representation.decode(move)
-        self.posn.make_move(move)
-
+        return move.to_str(), move.win
 
     def determine_time(self):
         '''

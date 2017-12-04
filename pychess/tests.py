@@ -16,18 +16,11 @@ class UnitTester():
 
     def run_tests(self):
         '''Run all tests.'''
-        self.__do_board_init_test()
         self.__do_rep_tests()
         self.__do_print_rep_tests()
         self.__do_test_moves()
         self.__ab_neg_test()
         self.__promotion_test()
-
-
-    def __do_board_init_test(self):
-        ''' Test correct starting board position. '''
-        board = Posn('W')
-        assert board.get_board() == 'W 0\nkqbnr\nppppp\n.....\n.....\nPPPPP\nRNBQK\n'
 
 
     def __do_rep_tests(self):
@@ -48,25 +41,11 @@ class UnitTester():
 
         assert test_move.to_str() == (test_square3.to_str() + '-' + test_square2.to_str())
 
-        # Check that scores start at zero, and reach appropriate values.
-        board = Posn('W')
-        assert board.compute_score('W') == 0
-        assert board.compute_score('B') == 0
-        assert board.compute_score('W', w_pieces=[]) == representation.MIN_SCORE
-        assert board.compute_score('B', b_pieces=[]) == representation.MIN_SCORE
-        assert board.compute_score('B', w_pieces=[]) == representation.MAX_SCORE
-        assert board.compute_score('W', b_pieces=[]) == representation.MAX_SCORE
-        assert board.compute_score('W', w_pieces=['Q'], b_pieces=[]) == 900
-
-        # Check that scores are 900 if the opponents queen is captured.
-        assert board.check_score_post_move('W', 0, 1) == 900
-        assert board.check_score_post_move('B', 5, 3) == 900
-
 
     def __do_print_rep_tests(self):
         ''' Test representation printing. '''
         board = Posn('W')
-        board.print_board()
+        print(board)
 
         test_square1 = Square(0, 0)
         test_square2 = Square(0, 4)
@@ -92,8 +71,8 @@ class UnitTester():
 
         # Do Bart's move checking
         ins = glob.glob('move-tests/*.in')
-        for file in ins:
-            with open(file) as i:
+        for filename in ins:
+            with open(filename) as i:
                 lines = i.readlines()
             color = lines[0].split()[1]
             board = []
@@ -110,18 +89,18 @@ class UnitTester():
             move_strs = []
             for move in moves:
                 move_strs.append(move.to_str())
-            with open(f[0:-2] + 'out') as o:
-                lines = o.readlines()
-            out = []
+            with open(filename[0:-2] + 'out') as out:
+                lines = out.readlines()
+            output = []
             for line in lines:
-                out.append(line.strip())
-            if collections.Counter(move_strs) != collections.Counter(out):
-                print(f)
+                output.append(line.strip())
+            if collections.Counter(move_strs) != collections.Counter(output):
+                print(filename)
                 print(posn.on_move)
                 print(move_strs)
-                print(out)
-                print(set(move_strs) - set(out))
-                posn.print_board()
+                print(output)
+                print(set(move_strs) - set(output))
+                print(posn)
 
 
     def __ab_neg_test(self):
@@ -155,3 +134,6 @@ class UnitTester():
         assert test_posn2.b_pieces == ['k', 'q', 'b', 'n', 'r', 'p', 'p', 'p', 'p', 'q']
         test_posn2.do_undo(undo)
         assert test_posn2.b_pieces == ['k', 'b', 'n', 'r', 'p', 'p', 'p', 'p', 'q', 'p']
+
+TESTER = UnitTester()
+TESTER.run_tests()
