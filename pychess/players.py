@@ -22,6 +22,7 @@ class Player(object):
         move = representation.decode(move)
         self.posn.make_move(move)
 
+
 class HumanPlayer(Player):
     '''
     Object to represent a human player.
@@ -43,7 +44,7 @@ class RandomPlayer(Player):
     Player that chooses moves randomly.
     '''
     def __init__(self, color):
-        super().__init__(self, color)
+        super().__init__(color)
 
     def make_move(self):
         '''
@@ -60,7 +61,7 @@ class HeuristicPlayer(Player):
     Player that chooses highest-scoring move.
     '''
     def __init__(self, color):
-        super().__init__(self, color)
+        super().__init__(color)
 
     def make_move(self):
         '''
@@ -87,7 +88,7 @@ class NegamaxPlayer(Player):
     Choose move based on negamax algorithm. Requires depth to search to.
     '''
     def __init__(self, color, depth):
-        super().__init__(self, color)
+        super().__init__(color)
         self.depth = depth
 
     def make_move(self):
@@ -105,7 +106,7 @@ class AlphaBetaPlayer(Player):
     Player that chooses move based on alpha-beta algorithm.
     '''
     def __init__(self, color, depth):
-        super().__init__(self, color)
+        super().__init__(color)
         self.depth = depth
 
     def make_move(self):
@@ -122,8 +123,8 @@ class IDPlayer(Player):
     '''
     Player that chooses move based on alpha-beta using iterative deepening.
     '''
-    def __init__(self, color, limit):
-        super().__init__(self, color)
+    def __init__(self, color, limit=None):
+        super().__init__(color)
         self.use_adjustment = False
         if limit is None:
             self.use_adjustment = True
@@ -153,3 +154,11 @@ class IDPlayer(Player):
             return 10
         else:
             return 4
+
+
+class WebsitePlayer(IDPlayer):
+    def __init__(self, color):
+        super().__init__(color, 7)
+
+    def getBoardPosition(self):
+        return self.posn
